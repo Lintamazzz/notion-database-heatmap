@@ -14,7 +14,11 @@ const notion = new Client({
 const databaseId = process.env.DATABASE_ID;
 
 
-// vercel functions
+// https://vercel.com/docs/functions/runtimes#max-duration
+// timeout默认为10s，免费版最大可设置为60s
+export const maxDuration = 60
+
+// vercel serverless functions
 export default async (req, res) => {
     try {
         const [last_edited_time, pages] = await Promise.all([
