@@ -19,6 +19,7 @@ const databaseId = process.env.DATABASE_ID;
 // https://vercel.com/guides/what-can-i-do-about-vercel-serverless-functions-timing-out#the-function-is-taking-too-long-to-process-a-request
 export default async (req, res) => {
     try {
+        let startTime = new Date()
         const [last_edited_time, pages] = await Promise.all([
             getLastEditedTime(),
             queryAllPagesFromDB()
@@ -34,9 +35,11 @@ export default async (req, res) => {
         ])  
         console.log("update complete")
         
+        let endTime = new Date()
         res.json({
-            "time": last_edited_time,
-            "data": data.length
+            "last_edited_time": last_edited_time,
+            "page_cnt": data.length,
+            "time_consumed": `${(endTime - startTime) / 1000} s`
         })
     } catch (err) {
         console.error(err)
@@ -53,10 +56,37 @@ const getLastEditedTime =  async () => {
 
 
 const queryAllPagesFromDB = async () => {
+    // 年份数组
+    let years = []
+    let now = new Date().getFullYear()
+    // 明年的活动也要算进去
+    for (let i = 2021; i <= now + 1; i++) {
+        years.push(i)
+    }
+
+    // 并行获取所有年份
+    console.log("Querying all pages from database:", databaseId);
+    const arr = await Promise.all(years.map(year => queryPagesByYear(year)))
+
+    // 汇总结果
+    let pages = [];
+    arr.forEach(pagesOfYear => {
+        pages = pages.concat(pagesOfYear)
+    })
+    console.log("Total pages queried: ", pages.length);
+    return pages
+};
+
+const queryPagesByYear = async (year) => {
     let pages = [];
     let cursor = null;
 
-    console.log("Querying all pages from database:", databaseId);
+    const filter = {
+        and: [
+            {property: "北京时间", date: {"on_or_after": `${year}-01-01`}},
+            {property: "北京时间", date: {"on_or_before": `${year}-12-31`}},
+        ]
+    }
     try {
         do {
             const response = await notion.databases.query({
@@ -67,22 +97,22 @@ const queryAllPagesFromDB = async () => {
                         direction: "ascending",
                     },
                 ],
+                filter: filter,
                 start_cursor: cursor || undefined,
             });
             pages = pages.concat(response.results);
             cursor = response.next_cursor;
-            console.log("next_cursor:", cursor);
+            console.log(year, "next_cursor:", cursor);
         } while (cursor);
 
-        console.log("Total pages queried: ", pages.length);
+        console.log(year, "pages queried: ", pages.length);
     } catch (error) {
         console.error("Failed to query pages:", error);
         throw error;
     }
 
-    return pages;
-};
-
+    return pages
+}
 
 
 const updateOne = async (key, data) => {
