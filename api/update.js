@@ -1,10 +1,5 @@
 import { Client } from "@notionhq/client";
 import 'dotenv/config'
-import dayjs from "dayjs";
-import tz from "dayjs/plugin/timezone.js";
-import utc from "dayjs/plugin/utc.js";
-dayjs.extend(tz); // 时区插件
-dayjs.extend(utc);
 
 
 const notion = new Client({
@@ -20,24 +15,18 @@ const databaseId = process.env.DATABASE_ID;
 export default async (req, res) => {
     try {
         let startTime = new Date()
-        const [last_edited_time, pages] = await Promise.all([
-            getLastEditedTime(),
-            queryAllPagesFromDB()
-        ])
+        const pages = await queryAllPagesFromDB()
         const data = pages.map((page) => ({
             date: page.created_time.substring(0, 10),
             cnt: 1,
         }));
 
-        await Promise.all([
-            updateOne("last_edited_time", last_edited_time),
-            updateOne("data", data)
-        ])  
+
+        await updateOne("data", data)
         console.log("update complete")
         
         let endTime = new Date()
         res.json({
-            "last_edited_time": last_edited_time,
             "page_cnt": data.length,
             "time_consumed": `${(endTime - startTime) / 1000} s`
         })
@@ -47,12 +36,6 @@ export default async (req, res) => {
     }
 }
 
-const getLastEditedTime =  async () => {
-    const res = await notion.databases.retrieve({ database_id: databaseId });
-    return dayjs(res.last_edited_time)
-            .tz("Asia/Shanghai")
-            .format("YYYY-MM-DD HH:mm")
-}
 
 
 const queryAllPagesFromDB = async () => {

@@ -45,19 +45,17 @@
             const baseUrl = window.location.origin; // 获取当前页面的根URL
 
             try {
-                // 使用 Promise.all 同时发送两个请求
-                const [lastEditedTimeResp, dataResp] = await Promise.all([
-                    fetch(baseUrl + '/api/database/last_edited_time').then(resp => resp.json()),
-                    fetch(baseUrl + '/api/database/data').then(resp => resp.json())
-                ]);
+                // 不需要等待 last edited time，异步执行
+                fetch(baseUrl + '/api/database/last_edited_time')
+                .then(resp => resp.json())
+                .then(lastEditedTime => {
+                    // 更新页面上的 last edited time
+                    document.getElementById("last").innerHTML = `Last edited time: ${lastEditedTime}`;
+                })
 
-                // 更新页面上的 last edited time
-                document.getElementById("last").innerHTML = `Last edited time: ${lastEditedTimeResp}`;
-
-                // 存储获取的数据
-                const mapData = dataResp;
-
-                // 数据准备好后，绘制 heatmap
+                // source 如果是 url 的话，点击按钮后调用 next() previous() 会重新获取数据
+                // 所以 source 改为本地变量，需要等数据准备好之后才开始绘制
+                const mapData = await fetch(baseUrl + '/api/database/data').then(resp => resp.json());
                 paintHeatMap(mapData);
             } catch (err) {
                 console.error("Error fetching data:", err);

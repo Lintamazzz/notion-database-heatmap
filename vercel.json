@@ -1,8 +1,12 @@
 {
     "rewrites": [
         { 
-            "source": "/api/database/:key", 
+            "source": "/api/database/data", 
             "destination": "/api/database" 
+        },
+        { 
+            "source": "/api/database/last_edited_time", 
+            "destination": "/api/lastEditedTime" 
         }
     ],
     "crons": [

@@ -1,8 +1,8 @@
 import 'dotenv/config'
 
 export default async (req, res) => {
-    const key = req.query.key
-    res.json(await findOne(key))
+    // const key = req.query.key
+    res.json(await findOne("data"))
 }
 
 
