@@ -1,0 +1,14 @@
+{
+    "rewrites": [
+        { 
+            "source": "/api/database/:key", 
+            "destination": "/api/database" 
+        }
+    ],
+    "crons": [
+        {
+            "path": "/api/update",
+            "schedule": "0 0 * * *"
+        }
+    ]
+}
