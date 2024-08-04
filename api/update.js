@@ -15,7 +15,7 @@ const databaseId = process.env.DATABASE_ID;
 
 
 
-// vercel serverless functions  timeout默认为10s，免费版最大可设置为60s
+// vercel serverless functions  timeout默认为10s，免费版最大可设置为60s，可以在 setting/Functions 里设置
 // https://vercel.com/guides/what-can-i-do-about-vercel-serverless-functions-timing-out#the-function-is-taking-too-long-to-process-a-request
 export default async (req, res) => {
     try {
@@ -71,7 +71,7 @@ const queryAllPagesFromDB = async () => {
     // 汇总结果
     let pages = [];
     arr.forEach(pagesOfYear => {
-        pages = pages.concat(pagesOfYear)
+        pages = pages.concat(pagesOfYear)  // 注意concat会生成新数组
     })
     console.log("Total pages queried: ", pages.length);
     return pages

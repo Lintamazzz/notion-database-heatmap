@@ -18,7 +18,7 @@ const findOne = async (key) => {
         method: "POST",
         headers: {
             "apiKey": apiKey,
-            "Content-Type": "application/ejson",
+            "Content-Type": "application/json",
             "Accept": "application/json"
         },
         body: JSON.stringify({
