@@ -71,7 +71,14 @@
 
                 // source 如果是 url 的话，点击按钮后调用 next() previous() 会重新获取数据
                 // 所以 source 改为本地变量，需要等数据准备好之后才开始绘制
-                mapData = await fetch(baseUrl + '/api/database/data').then(resp => resp.json());
+                // { date1: cnt1, date2: cnt2, ...} -> [ { date1, cnt1 }, { date2, cnt2 }, ...]
+                mapData = await fetch(baseUrl + '/api/database/data')
+                .then(resp => resp.json())
+                .then(data => Object.entries(data))
+                .then(data => data.map(([date, cnt]) => ({
+                    date: date,
+                    cnt: cnt,
+                })));
                 paintHeatMap();
 
                 // 添加点击事件

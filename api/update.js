@@ -16,10 +16,12 @@ export default async (req, res) => {
     try {
         let startTime = new Date()
         const pages = await queryAllPagesFromDB()
-        const data = pages.map((page) => ({
-            date: page.created_time.substring(0, 10),
-            cnt: 1,
-        }));
+        // 按日期计数 -> { date: cnt }
+        const data = pages.reduce((acc, page) => {
+            const date = page.created_time.substring(0, 10);
+            acc[date] = (acc[date] || 0) + 1;
+            return acc;
+        }, {});
 
 
         await updateOne("data", data)
@@ -52,10 +54,7 @@ const queryAllPagesFromDB = async () => {
     const arr = await Promise.all(years.map(year => queryPagesByYear(year)))
 
     // 汇总结果
-    let pages = [];
-    arr.forEach(pagesOfYear => {
-        pages = pages.concat(pagesOfYear)  // 注意concat会生成新数组
-    })
+    let pages = arr.flat();
     console.log("Total pages queried: ", pages.length);
     return pages
 };
@@ -83,7 +82,7 @@ const queryPagesByYear = async (year) => {
                 filter: filter,
                 start_cursor: cursor || undefined,
             });
-            pages = pages.concat(response.results);
+            pages.push(...response.results);
             cursor = response.next_cursor;
             console.log(year, "next_cursor:", cursor);
         } while (cursor);
