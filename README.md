@@ -1,4 +1,4 @@
-用到的工具：
+References: 
 
 - vercel
   - serverless function：
@@ -9,20 +9,14 @@
 - mongodb
   - https://vercel.com/integrations/mongodbatlas
   - https://www.mongodb.com/zh-cn/docs/atlas/reference/partner-integrations/vercel/
-  - Atlas Data API: https://www.mongodb.com/zh-cn/docs/atlas/app-services/data-api/
-
-- kimi、live server、dotenv、dayjs、bootstrap
-
-
-
-参考：
-
-- https://github.com/Zippland/Notion-Progress-Heatmap
-
-- https://cal-heatmap.com/ 
-  - showcase: Github profile contribution-like
-
+  - ~~Atlas Data API: https://www.mongodb.com/zh-cn/docs/atlas/app-services/data-api/~~
+  - MongoDB Driver: https://www.mongodb.com/zh-cn/docs/drivers/node/current/
 - notion API、SDK：https://developers.notion.com/docs/getting-started
   - Build your first integration
   - Postman workspace
   - API Reference
+- Heatmap:
+  - https://github.com/Zippland/Notion-Progress-Heatmap
+  - https://cal-heatmap.com/ 
+  (showcase: Github profile contribution-like)
+- dotenv、dayjs、bootstrap、ngrok (Reverse Proxy & Webhook Testing)
