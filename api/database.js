@@ -1,3 +1,4 @@
+import { MongoClient } from 'mongodb';
 import 'dotenv/config'
 
 export default async (req, res) => {
@@ -7,30 +8,17 @@ export default async (req, res) => {
 
 
 const findOne = async (key) => {
-    const endpoint = process.env.MONGO_DATA_API_ENDPOINT
-    const apiKey = process.env.MONGO_API_KEY
-    const dataSource = process.env.MONGO_DATASOURCE
-    const database = process.env.MONGO_DATABASE
-    const collection = process.env.MONGO_COLLECTION
+    const client = new MongoClient(process.env.MONGO_URI);
+    const db = client.db(process.env.MONGO_DATABASE);
+    const collection = db.collection(process.env.MONGO_COLLECTION);
 
+    try {
+        const result = await collection.findOne({ key });
 
-    const response = await fetch(endpoint + "/action/findOne", {
-        method: "POST",
-        headers: {
-            "apiKey": apiKey,
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
-        body: JSON.stringify({
-            "dataSource": dataSource,
-            "database": database,
-            "collection": collection,
-            "filter": {
-                "key": key
-            }
-        })
-    })
-
-    const json = await response.json()
-    return json?.document?.data
+        return result?.data;  // 如果没有找到或没有 data 字段，返回 undefined
+    } catch (error) {
+        console.error(`MongoDB findOne failed: ${error.message}`);
+    } finally {
+        await client.close();
+    }
 }

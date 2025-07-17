@@ -1,4 +1,5 @@
 import { Client } from "@notionhq/client";
+import { MongoClient } from 'mongodb';
 import 'dotenv/config'
 
 
@@ -7,7 +8,6 @@ const notion = new Client({
     notionVersion: "2022-06-28",
 });
 const databaseId = process.env.DATABASE_ID;
-
 
 
 // vercel serverless functions  timeout默认为10s，免费版最大可设置为60s，可以在 setting/Functions 里设置
@@ -98,35 +98,18 @@ const queryPagesByYear = async (year) => {
 
 
 const updateOne = async (key, data) => {
-    const endpoint = process.env.MONGO_DATA_API_ENDPOINT
-    const apiKey = process.env.MONGO_API_KEY
-    const dataSource = process.env.MONGO_DATASOURCE
-    const database = process.env.MONGO_DATABASE
-    const collection = process.env.MONGO_COLLECTION
+    const client = new MongoClient(process.env.MONGO_URI);
+    const db = client.db(process.env.MONGO_DATABASE);
+    const collection = db.collection(process.env.MONGO_COLLECTION);
 
-
-    const response = await fetch(endpoint + "/action/updateOne", {
-        method: "POST",
-        headers: {
-            "apiKey": apiKey,
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        },
-        body: JSON.stringify({
-            "dataSource": dataSource,
-            "database": database,
-            "collection": collection,
-            "filter": {
-                "key": key
-            },
-            "update": {
-                "$set": {
-                    "data": data
-                }
-            }
-        })
-    })
-    if (!response.ok) {
-        throw new Error(`Update request failed with status ${response.status}`)
+    try {
+        const result = await collection.updateOne(
+            { key }, 
+            { $set: { data } } 
+        );
+    } catch (error) {
+        console.error(`Error updating document: ${error.message}`);
+    } finally {
+        await client.close();
     }
 }
