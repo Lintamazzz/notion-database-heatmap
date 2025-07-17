@@ -28,7 +28,7 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        /* #window-size {
+        #window-size {
             position: fixed;
             bottom: 10px;
             right: 10px;
@@ -38,7 +38,7 @@
             border-radius: 5px;
             font-size: 14px;
             z-index: 1000;
-        } */
+        }
     </style>
 </head>
 
@@ -53,148 +53,7 @@
     <!-- 显示窗口大小和月份数 -->
     <!-- <div id="window-size"></div> -->
 
-    <script>
-        let cal; // 全局变量，用于存储 CalHeatmap 实例
-        let mapData; // 全局变量，用于存储热图数据
-
-        async function fetchDataAndPaint() {
-            const baseUrl = window.location.origin; // 获取当前页面的根URL
-
-            try {
-                // 不需要等待 last edited time，异步执行
-                fetch(baseUrl + '/api/database/last_edited_time')
-                .then(resp => resp.json())
-                .then(lastEditedTime => {
-                    // 更新页面上的 last edited time
-                    document.getElementById("last").innerHTML = `Last edited: ${lastEditedTime}`;
-                })
-
-                // source 如果是 url 的话，点击按钮后调用 next() previous() 会重新获取数据
-                // 所以 source 改为本地变量，需要等数据准备好之后才开始绘制
-                // { date1: cnt1, date2: cnt2, ...} -> [ { date1, cnt1 }, { date2, cnt2 }, ...]
-                mapData = await fetch(baseUrl + '/api/database/data')
-                .then(resp => resp.json())
-                .then(data => Object.entries(data))
-                .then(data => data.map(([date, cnt]) => ({
-                    date: date,
-                    cnt: cnt,
-                })));
-                paintHeatMap();
-
-                // 添加点击事件
-                document.getElementById("previous").addEventListener("click", () => cal.previous(1));
-                document.getElementById("next").addEventListener("click", () => cal.next(1));
-            } catch (err) {
-                console.error("Error fetching data:", err);
-            }
-        }
-
-        // 计算基于窗口宽度应该显示的月份数
-        function calculateMonthsToShow() {
-            const windowWidth = window.innerWidth;
-            // 每个月大约需要 75px 宽度（包括间距）
-            // 减去左右边距和一些额外空间
-            const availableWidth = windowWidth - 80;
-            // 计算可以显示的月份数量，最少显示 3 个月，最多显示 12 个月
-            return Math.max(3, Math.min(12, Math.floor(availableWidth / 75)));
-        }
-
-        function paintHeatMap() {
-            // 如果已经存在实例，先销毁它
-            if (cal) {
-                cal.destroy();
-            }
-
-            // 创建新实例
-            cal = new CalHeatmap();
-            
-            // 计算应该显示的月份数
-            const monthsToShow = calculateMonthsToShow();
-            
-            // 调整位置
-            document.getElementById('last').style.marginLeft = `${monthsToShow * (50 - (12 - monthsToShow) * (monthsToShow >= 6 ? 3 : (monthsToShow == 5 ? 4.5 : 6)))}px`;
-
-            // 绘制
-            cal.paint({
-                data: {
-                    source: mapData,
-                    type: 'json',
-                    x: 'date',
-                    y: 'cnt',
-                    groupY: 'sum',
-                },
-                date: {
-                    start: new Date(new Date().getFullYear(), new Date().getMonth() - (monthsToShow - 2)),
-                    min: new Date("2021-01-01"),
-                },
-                range: monthsToShow,  // 设置显示的月份数量
-                scale: {
-                    color: {
-                        scheme: 'Greens',
-                        type: 'linear',
-                        domain: [0, 5],
-                    },
-                },
-                domain: {
-                    type: "month",
-                    gutter: 4,
-                    label: { text: "YY/MM", position: "top", textAlign: "start" },
-                },
-                subDomain: { type: "day", radius: 2, width: 11, height: 11, gutter: 4 },
-            }, [
-                [
-                    Tooltip,
-                    {
-                        text: function (date, value, dayjsDate) {
-                            return (
-                                (value ? value : '0') +
-                                ' updates on ' +
-                                dayjsDate.format('dddd, MMMM D, YYYY')
-                            );
-                        },
-                    },
-                ],
-                [
-                    CalendarLabel,
-                    {
-                        width: 30,
-                        textAlign: 'start',
-                        text: () => dayjs.weekdaysShort().map((d, i) => (i % 2 == 0 ? '' : d)),
-                        padding: [25, 0, 0, 0],
-                    },
-                ],
-            ]);
-
-            // 更新窗口大小显示，同时显示当前显示的月份数
-            // updateWindowSize(monthsToShow);
-        }
-
-        // 更新窗口大小显示
-        // function updateWindowSize(monthsToShow) {
-        //     const windowSizeElement = document.getElementById('window-size');
-        //     windowSizeElement.textContent = `窗口大小: ${window.innerWidth} × ${window.innerHeight} | 显示月份: ${monthsToShow || calculateMonthsToShow()}`;
-        // }
-
-        // 当DOM加载完成后调用获取数据和绘制热图的函数
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchDataAndPaint();
-        });
-
-        // 监听窗口大小变化事件
-        window.addEventListener('resize', () => {
-            // 当窗口大小变化时，重新绘制热图
-            if (mapData) {
-                // 添加防抖，避免频繁重绘
-                clearTimeout(window.resizeTimer);
-                window.resizeTimer = setTimeout(() => {
-                    paintHeatMap();
-                }, 250);
-            } else {
-                // 如果数据还没加载，只更新窗口大小显示
-                // updateWindowSize();
-            }
-        });
-    </script>
+    <script type="module" src="js/main.js"></script>
 </body>
 
 </html>
