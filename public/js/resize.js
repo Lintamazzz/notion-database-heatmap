@@ -20,25 +20,33 @@ window.addEventListener('resize', () => {
         }
 
         // 调整 Last Edited Time 的位置，保持在热图右下方显示
-        updateLastEdited();
+        updateLastEditedPosition();
 
         // 实时显示窗口大小、月份数量
-        updateWindowSize();
+        updateWindowInfo();
 
     }, 250);
 });
 
-export function updateLastEdited() {
+/**
+ * 更新 “Last edited” 的位置，使其保持在热图右下方显示
+ */
+export function updateLastEditedPosition() {
     const monthsToShow = calculateMonthsToShow();
     document.getElementById('last').style.marginLeft = `${monthsToShow * (50 - (12 - monthsToShow) * (monthsToShow >= 6 ? 3 : (monthsToShow == 5 ? 4.5 : 6)))}px`;
 }
 
-export function updateWindowSize() {
+/**
+ * 更新窗口大小信息、以及当前显示的月份数量
+ */
+export function updateWindowInfo() {
     // const windowSizeElement = document.getElementById('window-size');
     // windowSizeElement.textContent = `窗口大小: ${window.innerWidth} × ${window.innerHeight} | 显示月份: ${calculateMonthsToShow()}`;
 }
 
-// 计算基于当前窗口宽度应该显示的月份数
+/**
+ * 基于当前窗口宽度，计算应该显示的月份数
+ */
 export function calculateMonthsToShow() {
     const windowWidth = window.innerWidth;
     // 每个月大约需要 75px 宽度
